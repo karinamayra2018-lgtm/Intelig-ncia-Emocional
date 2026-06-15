@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador de Currículo — Faculdade Edufor</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #F9F4EF;
+    color: #222;
+    min-height: 100vh;
+  }
+
+  .topbar {
+    background: #3D1F10;
+    color: #fff;
+    padding: 10px 24px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .topbar strong { font-size: 14px; }
+  .topbar span { opacity: .7; }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .header-card {
+    background: #3D1F10;
+    border-radius: 14px;
+    padding: 1.75rem;
+    margin-bottom: 1.75rem;
+    color: #fff;
+  }
+  .header-card h1 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+  .header-card p { font-size: 13px; opacity: .75; line-height: 1.5; }
+
+  .progress-wrap { margin-bottom: 1.5rem; }
+  .progress-track { height: 4px; background: #e2d5c8; border-radius: 2px; }
+  .progress-bar { height: 100%; background: #C8A882; border-radius: 2px; transition: width .35s; }
+
+  .steps-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .step-btn {
+    flex: 1;
+    min-width: 90px;
+    padding: 10px 6px 8px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #fff;
+    font-size: 12px;
+    cursor: pointer;
+    color: #888;
+    text-align: center;
+    transition: all .2s;
+    line-height: 1.4;
+  }
+  .step-btn i { font-size: 18px; display: block; margin-bottom: 2px; }
+  .step-btn.active { background: #3D1F10; color: #fff; border-color: #3D1F10; }
+  .step-btn.done { background: #f0e6d8; color: #6B3F1E; border-color: #C8A882; }
+
+  .card {
+    background: #fff;
+    border: 1px solid #e8ddd3;
+    border-radius: 14px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #3D1F10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tip {
+    background: #FFF8F3;
+    border-left: 3px solid #C8A882;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #6B3F1E;
+    margin-bottom: 1.25rem;
+    line-height: 1.6;
+    border-radius: 0 8px 8px 0;
+  }
+
+  label {
+    font-size: 13px;
+    color: #555;
+    display: block;
+    margin-bottom: 5px;
+    margin-top: 14px;
+    font-weight: 500;
+  }
+  label:first-of-type { margin-top: 0; }
+
+  input[type=text], input[type=email], textarea, select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    color: #222;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color .2s;
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: #C8A882;
+    box-shadow: 0 0 0 3px rgba(200,168,130,.15);
+  }
+  textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+
+  .char-hint { font-size: 11px; color: #aaa; margin-top: 4px; }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media(max-width:520px){ .row2 { grid-template-columns: 1fr; } }
+
+  .exp-block {
+    border: 1px solid #e8ddd3;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+    background: #fdfaf7;
+  }
+  .exp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .exp-label { font-size: 13px; font-weight: 600; color: #3D1F10; }
+  .del-btn { background: none; border: none; color: #bbb; cursor: pointer; font-size: 20px; line-height: 1; padding: 0; transition: color .2s; }
+  .del-btn:hover { color: #E24B4A; }
+
+  .skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  @media(max-width:520px){ .skills-grid { grid-template-columns: 1fr; } }
+
+  .skill-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid #e8ddd3;
+    border-radius: 8px;
+    background: #fdfaf7;
+  }
+  .skill-item input[type=text] {
+    border: none; background: transparent; padding: 0;
+    font-size: 13px; flex: 1; box-shadow: none;
+  }
+  .skill-item input[type=text]:focus { box-shadow: none; border: none; }
+  .skill-dots { display: flex; gap: 3px; flex-shrink: 0; }
+  .dot {
+    width: 13px; height: 13px; border-radius: 50%;
+    border: 1.5px solid #C8A882; cursor: pointer;
+    background: transparent; transition: .15s;
+  }
+  .dot.filled { background: #3D1F10; border-color: #3D1F10; }
+
+  .add-btn {
+    width: 100%; padding: 10px;
+    border: 1px dashed #C8A882; border-radius: 8px;
+    background: transparent; color: #888;
+    font-size: 13px; cursor: pointer; margin-top: 8px;
+    transition: all .2s; font-family: inherit;
+  }
+  .add-btn:hover { background: #f0e6d8; color: #3D1F10; }
+
+  .nav-btns { display: flex; gap: 10px; margin-top: 1rem; }
+  .btn-back {
+    flex: 1; padding: 11px;
+    border: 1px solid #ddd; border-radius: 10px;
+    background: transparent; color: #666;
+    font-size: 14px; cursor: pointer; font-family: inherit;
+    transition: all .2s;
+  }
+  .btn-back:hover { background: #f5f5f5; }
+  .btn-next {
+    flex: 2; padding: 11px;
+    border: none; border-radius: 10px;
+    background: #3D1F10; color: #fff;
+    font-size: 14px; cursor: pointer; font-weight: 600;
+    font-family: inherit; transition: background .2s;
+  }
+  .btn-next:hover { background: #2a1508; }
+
+  .hidden { display: none !important; }
+
+  .field-error { border-color: #E24B4A !important; }
+  .alert { background: #fff3f3; border: 1px solid #f5c6c6; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #c0392b; margin-bottom: 1rem; }
+
+  /* ── CURRÍCULO ── */
+  #cv-preview-wrap {
+    background: #fff;
+    border: 1px solid #e8ddd3;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+
+  #cv-container {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #111;
+    padding: 32px 36px;
+    background: #fff;
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  .cv-sidebar-layout { display: flex; gap: 0; min-height: 900px; }
+
+  .cv-sidebar {
+    width: 26%;
+    background: #1B3A6B;
+    padding: 28px 16px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .cv-main { flex: 1; padding: 28px 20px; }
+
+  .cv-avatar {
+    width: 70px; height: 70px; border-radius: 50%;
+    background: #fff; display: flex; align-items: center;
+    justify-content: center; margin: 0 auto 12px;
+    font-size: 22px; font-weight: 700; color: #1B3A6B;
+  }
+
+  .cv-sidebar-name {
+    font-size: 14px; font-weight: 700; color: #fff;
+    text-align: center; line-height: 1.3;
+  }
+  .cv-sidebar-role {
+    font-size: 11px; color: #a0bcdf;
+    text-align: center; margin-top: 3px;
+  }
+
+  .cv-sidebar-section { margin-top: 4px; }
+  .cv-sidebar-section-title {
+    font-size: 10px; font-weight: 700; color: #a0bcdf;
+    text-transform: uppercase; letter-spacing: .8px;
+    border-bottom: 1px solid rgba(255,255,255,.2);
+    padding-bottom: 4px; margin-bottom: 8px;
+  }
+  .cv-contact-item {
+    font-size: 11px; color: #d0e4f7;
+    margin-bottom: 5px; word-break: break-all;
+    display: flex; gap: 5px; align-items: flex-start;
+  }
+  .cv-contact-icon { opacity: .7; flex-shrink: 0; margin-top: 1px; }
+
+  .cv-skill-bar-row { margin-bottom: 7px; }
+  .cv-skill-bar-label { font-size: 11px; color: #d0e4f7; margin-bottom: 3px; }
+  .cv-skill-bar-track { height: 5px; background: rgba(255,255,255,.2); border-radius: 3px; }
+  .cv-skill-bar-fill { height: 100%; background: #C8A882; border-radius: 3px; }
+
+  .cv-main-name { font-size: 22px; font-weight: 700; color: #1B3A6B; }
+  .cv-main-role { font-size: 13px; color: #4A6FA5; margin-top: 2px; font-weight: 600; }
+  .cv-summary { font-size: 12px; color: #333; line-height: 1.65; margin: 14px 0; }
+
+  .cv-main-section { margin-bottom: 18px; }
+  .cv-main-section-title {
+    font-size: 13px; font-weight: 700; color: #1B3A6B;
+    border-bottom: 2px solid #1B3A6B;
+    padding-bottom: 3px; margin-bottom: 10px;
+  }
+
+  .cv-exp-item { margin-bottom: 12px; padding-left: 10px; border-left: 3px solid #C8A882; }
+  .cv-exp-role { font-size: 13px; font-weight: 700; color: #1B3A6B; }
+  .cv-exp-company { font-size: 12px; color: #555; font-style: italic; }
+  .cv-exp-period { font-size: 11px; color: #888; margin-bottom: 4px; }
+  .cv-exp-list { padding-left: 14px; margin-top: 4px; }
+  .cv-exp-list li { margin-bottom: 2px; font-size: 12px; color: #333; }
+  .cv-conquistas { margin-top: 5px; }
+  .cv-conquistas-title { font-size: 11px; font-weight: 700; color: #3D1F10; }
+  .cv-conquistas ul { padding-left: 14px; }
+  .cv-conquistas li { font-size: 12px; color: #333; margin-bottom: 2px; }
+
+  .cv-edu-item { margin-bottom: 10px; padding-left: 10px; border-left: 3px solid #1B3A6B; }
+  .cv-edu-degree { font-size: 13px; font-weight: 700; color: #1B3A6B; }
+  .cv-edu-inst { font-size: 12px; color: #555; }
+  .cv-edu-year { font-size: 11px; color: #888; }
+
+  .download-area { display: flex; gap: 10px; justify-content: center; padding: 1rem; }
+  .btn-edit {
+    padding: 11px 22px; background: transparent;
+    color: #3D1F10; border: 1px solid #3D1F10;
+    border-radius: 10px; font-size: 14px;
+    cursor: pointer; font-family: inherit; transition: all .2s;
+  }
+  .btn-edit:hover { background: #f0e6d8; }
+  .btn-download {
+    padding: 11px 28px; background: #3D1F10; color: #fff;
+    border: none; border-radius: 10px; font-size: 14px;
+    cursor: pointer; font-weight: 600; font-family: inherit;
+    transition: background .2s; display: flex; align-items: center; gap: 8px;
+  }
+  .btn-download:hover { background: #2a1508; }
+
+  .empty-state {
+    text-align: center; padding: 1.5rem;
+    color: #aaa; font-size: 13px;
+  }
+  .empty-state i { font-size: 32px; display: block; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <i class="ti ti-school" aria-hidden="true"></i>
+  <strong>Faculdade Edufor</strong>
+  <span>·</span>
+  <span>Projeto de Extensão — Inteligência Emocional: Como Elaborar um Currículo de Destaque no Mercado de Trabalho</span>
+</div>
+
+<div class="container">
+
+  <div class="header-card">
+    <h1><i class="ti ti-file-text" aria-hidden="true"></i> Gerador de Currículo Profissional</h1>
+    <p>Preencha seus dados passo a passo e receba um currículo pronto para impressão ou envio digital.<br>
+    Integrantes: Andressa Medeiros · Leticia Constantino · Leidiane Espindola · Leidiane Gomes · Milena Santos · Raysla Sousa · Luana Rodrigues · Talita Louzeiro</p>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-track">
+      <div class="progress-bar" id="progress-bar" style="width:20%"></div>
+    </div>
+  </div>
+
+  <div class="steps-row">
+    <div class="step-btn active" id="sBtn0" onclick="goStep(0)">
+      <i class="ti ti-user" aria-hidden="true"></i>Dados pessoais
+    </div>
+    <div class="step-btn" id="sBtn1" onclick="goStep(1)">
+      <i class="ti ti-briefcase" aria-hidden="true"></i>Experiência
+    </div>
+    <div class="step-btn" id="sBtn2" onclick="goStep(2)">
+      <i class="ti ti-school" aria-hidden="true"></i>Formação
+    </div>
+    <div class="step-btn" id="sBtn3" onclick="goStep(3)">
+      <i class="ti ti-star" aria-hidden="true"></i>Competências
+    </div>
+    <div class="step-btn" id="sBtn4" onclick="goStep(4)">
+      <i class="ti ti-eye" aria-hidden="true"></i>Visualizar
+    </div>
+  </div>
+
+  <!-- ─── STEP 0: Dados Pessoais ─── -->
+  <div id="step0">
+    <div class="card">
+      <div class="section-title"><i class="ti ti-user" aria-hidden="true"></i> Dados pessoais</div>
+      <div class="tip">
+        <strong>💡 Dica:</strong> Inclua apenas dados profissionais relevantes. Não é necessário informar RG, CPF, estado civil ou data de nascimento em currículos modernos. Use um e-mail profissional — evite apelidos ou números desnecessários.
+      </div>
+      <div id="alert0" class="alert hidden">Preencha todos os campos obrigatórios (*) antes de continuar.</div>
+      <label>Nome completo *</label>
+      <input type="text" id="nome" placeholder="Ex: Maria da Silva Santos">
+      <label>Cargo ou área de atuação *</label>
+      <input type="text" id="cargo" placeholder="Ex: Analista de Marketing Digital">
+      <div class="row2">
+        <div>
+          <label>Telefone *</label>
+          <input type="text" id="tel" placeholder="(XX) XXXXX-XXXX">
+        </div>
+        <div>
+          <label>E-mail profissional *</label>
+          <input type="email" id="email" placeholder="nome@email.com">
+        </div>
+      </div>
+      <div class="row2">
+        <div>
+          <label>LinkedIn (opcional)</label>
+          <input type="text" id="linkedin" placeholder="linkedin.com/in/seuperfil">
+        </div>
+        <div>
+          <label>Cidade / Estado</label>
+          <input type="text" id="cidade" placeholder="Ex: São Luís, MA">
+        </div>
+      </div>
+      <label>Objetivo profissional / Resumo *</label>
+      <textarea id="objetivo" maxlength="800" oninput="countChars(this,'obj-count')" placeholder="Descreva sua trajetória, principais diferenciais e o que busca profissionalmente. Seja específico e evite clichês como 'comprometido' ou 'proativo'. Ex: Advogada trabalhista com 5 anos de experiência em..."></textarea>
+      <div class="char-hint"><span id="obj-count">0</span>/800 caracteres &nbsp;·&nbsp; Recomendado: entre 300 e 600 caracteres</div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-next" onclick="nextStep(0)">Próximo: Experiência →</button>
+    </div>
+  </div>
+
+  <!-- ─── STEP 1: Experiência ─── -->
+  <div id="step1" class="hidden">
+    <div class="card">
+      <div class="section-title"><i class="ti ti-briefcase" aria-hidden="true"></i> Experiência profissional</div>
+      <div class="tip">
+        <strong>💡 Dica:</strong> Liste as experiências da mais recente para a mais antiga. Destaque responsabilidades com verbos de ação (Coordenei, Implementei, Gerenciei) e conquistas com números sempre que possível. Ex: <em>"Aumentei em 25% a captação de clientes"</em>.
+      </div>
+      <div id="exp-list">
+        <div class="empty-state">
+          <i class="ti ti-briefcase" aria-hidden="true"></i>
+          Nenhuma experiência adicionada ainda.<br>Clique em "Adicionar experiência" abaixo.
+        </div>
+      </div>
+      <button class="add-btn" onclick="addExp()"><i class="ti ti-plus" aria-hidden="true"></i> Adicionar experiência</button>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="goStep(0)">← Voltar</button>
+      <button class="btn-next" onclick="nextStep(1)">Próximo: Formação →</button>
+    </div>
+  </div>
+
+  <!-- ─── STEP 2: Formação ─── -->
+  <div id="step2" class="hidden">
+    <div class="card">
+      <div class="section-title"><i class="ti ti-school" aria-hidden="true"></i> Formação acadêmica</div>
+      <div class="tip">
+        <strong>💡 Dica:</strong> Liste da mais recente para a mais antiga. Inclua pós-graduações, MBAs e especializações. Cursos livres e técnicos podem ser mencionados na seção de competências.
+      </div>
+      <div id="edu-list">
+        <div class="empty-state">
+          <i class="ti ti-school" aria-hidden="true"></i>
+          Nenhuma formação adicionada ainda.<br>Clique em "Adicionar formação" abaixo.
+        </div>
+      </div>
+      <button class="add-btn" onclick="addEdu()"><i class="ti ti-plus" aria-hidden="true"></i> Adicionar formação</button>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="goStep(1)">← Voltar</button>
+      <button class="btn-next" onclick="nextStep(2)">Próximo: Competências →</button>
+    </div>
+  </div>
+
+  <!-- ─── STEP 3: Competências ─── -->
+  <div id="step3" class="hidden">
+    <div class="card">
+      <div class="section-title"><i class="ti ti-star" aria-hidden="true"></i> Competências</div>
+      <div class="tip">
+        <strong>💡 Dica:</strong> Inclua habilidades técnicas e comportamentais relevantes para sua área. Use os pontos para indicar seu nível de domínio: <strong>1 ponto</strong> = básico · <strong>3 pontos</strong> = intermediário · <strong>5 pontos</strong> = especialista. Evite habilidades genéricas demais como apenas "Excel" — prefira "Excel avançado (tabelas dinâmicas, VBA)".
+      </div>
+      <div class="skills-grid" id="skills-grid"></div>
+      <button class="add-btn" onclick="addSkill()"><i class="ti ti-plus" aria-hidden="true"></i> Adicionar competência</button>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="goStep(2)">← Voltar</button>
+      <button class="btn-next" onclick="generateAndShow()">Gerar meu currículo →</button>
+    </div>
+  </div>
+
+  <!-- ─── STEP 4: Currículo Gerado ─── -->
+  <div id="step4" class="hidden">
+    <div class="tip" style="margin-bottom:1rem">
+      <strong>✅ Currículo gerado!</strong> Revise todas as informações antes de baixar. Você pode voltar e editar qualquer seção clicando nos botões acima.
+    </div>
+    <div id="cv-preview-wrap">
+      <div id="cv-container"></div>
+    </div>
+    <div class="download-area">
+      <button class="btn-edit" onclick="goStep(0)"><i class="ti ti-edit" aria-hidden="true"></i> Editar dados</button>
+      <button class="btn-download" onclick="downloadCV()">
+        <i class="ti ti-download" aria-hidden="true"></i> Baixar currículo em PDF
+      </button>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+let currentStep = 0;
+let exps = [];
+let edus = [];
+let skills = [
+  {name:'',level:3},{name:'',level:3},
+  {name:'',level:3},{name:'',level:3}
+];
+
+/* ── navegação ── */
+function goStep(n){
+  for(let i=0;i<5;i++){
+    document.getElementById('step'+i).classList.add('hidden');
+    const btn=document.getElementById('sBtn'+i);
+    btn.classList.remove('active','done');
+  }
+  for(let i=0;i<n;i++) document.getElementById('sBtn'+i).classList.add('done');
+  document.getElementById('sBtn'+n).classList.add('active');
+  document.getElementById('step'+n).classList.remove('hidden');
+  document.getElementById('progress-bar').style.width=((n+1)/5*100)+'%';
+  currentStep=n;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function nextStep(from){
+  if(from===0){
+    const required=['nome','cargo','tel','email','objetivo'];
+    let ok=true;
+    required.forEach(id=>{
+      const el=document.getElementById(id);
+      if(!el.value.trim()){el.classList.add('field-error');ok=false;}
+      else el.classList.remove('field-error');
+    });
+    if(!ok){document.getElementById('alert0').classList.remove('hidden');return;}
+    document.getElementById('alert0').classList.add('hidden');
+  }
+  if(from===1 && exps.length===0){
+    if(!confirm('Nenhuma experiência foi adicionada. Deseja continuar mesmo assim?')) return;
+  }
+  if(from===2 && edus.length===0){
+    if(!confirm('Nenhuma formação foi adicionada. Deseja continuar mesmo assim?')) return;
+  }
+  goStep(from+1);
+}
+
+/* ── contador de chars ── */
+function countChars(el,id){
+  document.getElementById(id).textContent=el.value.length;
+}
+
+/* ── Experiências ── */
+function addExp(){
+  exps.push({cargo:'',empresa:'',inicio:'',fim:'',atual:false,resp:'',conquistas:''});
+  renderExps();
+}
+function removeExp(i){
+  if(confirm('Remover esta experiência?')){exps.splice(i,1);renderExps();}
+}
+function renderExps(){
+  const c=document.getElementById('exp-list');
+  if(exps.length===0){
+    c.innerHTML='<div class="empty-state"><i class="ti ti-briefcase"></i>Nenhuma experiência adicionada ainda.<br>Clique em "Adicionar experiência" abaixo.</div>';
+    return;
+  }
+  c.innerHTML='';
+  exps.forEach((e,i)=>{
+    const div=document.createElement('div');
+    div.className='exp-block';
+    div.innerHTML=`
+      <div class="exp-header">
+        <span class="exp-label" id="exp-label-${i}">${e.cargo||'Nova experiência'}</span>
+        <button class="del-btn" onclick="removeExp(${i})" title="Remover">×</button>
+      </div>
+      <div class="row2">
+        <div>
+          <label>Cargo *</label>
+          <input type="text" value="${esc(e.cargo)}" oninput="exps[${i}].cargo=this.value;document.getElementById('exp-label-${i}').textContent=this.value||'Nova experiência'" placeholder="Ex: Assistente Administrativo">
+        </div>
+        <div>
+          <label>Empresa *</label>
+          <input type="text" value="${esc(e.empresa)}" oninput="exps[${i}].empresa=this.value" placeholder="Nome da empresa">
+        </div>
+      </div>
+      <div class="row2">
+        <div>
+          <label>Início (mês/ano)</label>
+          <input type="text" value="${esc(e.inicio)}" oninput="exps[${i}].inicio=this.value" placeholder="Ex: 01/2022">
+        </div>
+        <div>
+          <label>Fim &nbsp;<label style="display:inline;font-weight:400;color:#888"><input type="checkbox" ${e.atual?'checked':''} onchange="exps[${i}].atual=this.checked;document.getElementById('fim-${i}').disabled=this.checked;document.getElementById('fim-${i}').value=''"> emprego atual</label></label>
+          <input id="fim-${i}" type="text" value="${esc(e.fim)}" oninput="exps[${i}].fim=this.value" placeholder="Ex: 03/2024" ${e.atual?'disabled':''}>
+        </div>
+      </div>
+      <label>Responsabilidades principais</label>
+      <textarea oninput="exps[${i}].resp=this.value" placeholder="Liste uma por linha. Ex:&#10;Elaborar relatórios mensais&#10;Coordenar equipe de 5 pessoas">${esc(e.resp)}</textarea>
+      <div class="char-hint">💡 Use verbos no passado: Coordenei, Implementei, Desenvolvi, Gerenciei</div>
+      <label>Conquistas e resultados (opcional)</label>
+      <textarea oninput="exps[${i}].conquistas=this.value" placeholder="Liste uma por linha. Ex:&#10;Reduzi em 15% o tempo de entrega dos relatórios">${esc(e.conquistas)}</textarea>
+    `;
+    c.appendChild(div);
+  });
+}
+
+/* ── Formação ── */
+function addEdu(){
+  edus.push({grau:'',curso:'',inst:'',ano:''});
+  renderEdus();
+}
+function removeEdu(i){
+  if(confirm('Remover esta formação?')){edus.splice(i,1);renderEdus();}
+}
+function renderEdus(){
+  const c=document.getElementById('edu-list');
+  if(edus.length===0){
+    c.innerHTML='<div class="empty-state"><i class="ti ti-school"></i>Nenhuma formação adicionada ainda.<br>Clique em "Adicionar formação" abaixo.</div>';
+    return;
+  }
+  c.innerHTML='';
+  edus.forEach((e,i)=>{
+    const div=document.createElement('div');
+    div.className='exp-block';
+    div.innerHTML=`
+      <div class="exp-header">
+        <span class="exp-label" id="edu-label-${i}">${e.curso||'Nova formação'}</span>
+        <button class="del-btn" onclick="removeEdu(${i})" title="Remover">×</button>
+      </div>
+      <div class="row2">
+        <div>
+          <label>Nível *</label>
+          <select onchange="edus[${i}].grau=this.value">
+            <option value="">Selecione</option>
+            ${['Doutorado','Mestrado','Pós-graduação','Especialização','MBA','Graduação','Tecnólogo','Técnico'].map(g=>`<option ${e.grau===g?'selected':''}>${g}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <label>Ano de conclusão</label>
+          <input type="text" value="${esc(e.ano)}" oninput="edus[${i}].ano=this.value" placeholder="Ex: 2023">
+        </div>
+      </div>
+      <label>Curso *</label>
+      <input type="text" value="${esc(e.curso)}" oninput="edus[${i}].curso=this.value;document.getElementById('edu-label-${i}').textContent=this.value||'Nova formação'" placeholder="Ex: Administração de Empresas">
+      <label>Instituição *</label>
+      <input type="text" value="${esc(e.inst)}" oninput="edus[${i}].inst=this.value" placeholder="Ex: Faculdade Edufor — São Luís, MA">
+    `;
+    c.appendChild(div);
+  });
+}
+
+/* ── Competências ── */
+function addSkill(){skills.push({name:'',level:3});renderSkills();}
+function setLevel(i,l){skills[i].level=l;renderSkills();}
+function removeSkill(i){skills.splice(i,1);renderSkills();}
+function renderSkills(){
+  const grid=document.getElementById('skills-grid');
+  grid.innerHTML='';
+  skills.forEach((s,i)=>{
+    const div=document.createElement('div');
+    div.className='skill-item';
+    let dots='';
+    for(let d=1;d<=5;d++) dots+=`<span class="dot${s.level>=d?' filled':''}" onclick="setLevel(${i},${d})" title="Nível ${d}"></span>`;
+    div.innerHTML=`
+      <input type="text" value="${esc(s.name)}" oninput="skills[${i}].name=this.value" placeholder="Ex: Excel avançado">
+      <div class="skill-dots">${dots}</div>
+      <button class="del-btn" onclick="removeSkill(${i})" style="font-size:16px" title="Remover">×</button>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+/* ── Gerar currículo ── */
+function generateAndShow(){
+  buildCV();
+  goStep(4);
+}
+
+function getInitials(name){
+  return name.split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+}
+
+function buildCV(){
+  const nome=document.getElementById('nome').value.trim();
+  const cargo=document.getElementById('cargo').value.trim();
+  const tel=document.getElementById('tel').value.trim();
+  const email=document.getElementById('email').value.trim();
+  const linkedin=document.getElementById('linkedin').value.trim();
+  const cidade=document.getElementById('cidade').value.trim();
+  const objetivo=document.getElementById('objetivo').value.trim();
+  const initials=getInitials(nome);
+
+  /* contatos sidebar */
+  let contactsHTML=`<div class="cv-contact-item"><span class="cv-contact-icon">📞</span>${tel}</div>`;
+  contactsHTML+=`<div class="cv-contact-item"><span class="cv-contact-icon">✉</span>${email}</div>`;
+  if(cidade) contactsHTML+=`<div class="cv-contact-item"><span class="cv-contact-icon">📍</span>${cidade}</div>`;
+  if(linkedin) contactsHTML+=`<div class="cv-contact-item"><span class="cv-contact-icon">🔗</span>${linkedin}</div>`;
+
+  /* competências sidebar */
+  const validSkills=skills.filter(s=>s.name.trim());
+  let skillsHTML='';
+  if(validSkills.length>0){
+    skillsHTML=`<div class="cv-sidebar-section">
+      <div class="cv-sidebar-section-title">Competências</div>`;
+    validSkills.forEach(s=>{
+      skillsHTML+=`<div class="cv-skill-bar-row">
+        <div class="cv-skill-bar-label">${s.name}</div>
+        <div class="cv-skill-bar-track"><div class="cv-skill-bar-fill" style="width:${s.level/5*100}%"></div></div>
+      </div>`;
+    });
+    skillsHTML+='</div>';
+  }
+
+  /* experiências */
+  let expHTML='';
+  if(exps.length>0){
+    expHTML='<div class="cv-main-section"><div class="cv-main-section-title">Experiência</div>';
+    exps.forEach(e=>{
+      const periodo=e.atual?`${e.inicio} — atualmente`:(e.inicio&&e.fim?`${e.inicio} — ${e.fim}`:e.inicio||'');
+      const respLines=e.resp.trim().split('\n').filter(l=>l.trim());
+      const conquLines=e.conquistas.trim().split('\n').filter(l=>l.trim());
+      expHTML+=`<div class="cv-exp-item">
+        <div class="cv-exp-role">${e.cargo}</div>
+        <div class="cv-exp-company">${e.empresa}</div>
+        <div class="cv-exp-period">${periodo}</div>
+        ${respLines.length>0?`<ul class="cv-exp-list">${respLines.map(l=>`<li>${l}</li>`).join('')}</ul>`:''}
+        ${conquLines.length>0?`<div class="cv-conquistas"><div class="cv-conquistas-title">Conquistas</div><ul class="cv-conquistas">${conquLines.map(l=>`<li>${l}</li>`).join('')}</ul></div>`:''}
+      </div>`;
+    });
+    expHTML+='</div>';
+  }
+
+  /* formação */
+  let eduHTML='';
+  if(edus.length>0){
+    eduHTML='<div class="cv-main-section"><div class="cv-main-section-title">Educação</div>';
+    edus.forEach(e=>{
+      eduHTML+=`<div class="cv-edu-item">
+        <div class="cv-edu-degree">${e.grau?e.grau+' em ':''} ${e.curso}</div>
+        <div class="cv-edu-inst">${e.inst}</div>
+        ${e.ano?`<div class="cv-edu-year">${e.ano}</div>`:''}
+      </div>`;
+    });
+    eduHTML+='</div>';
+  }
+
+  document.getElementById('cv-container').innerHTML=`
+    <div class="cv-sidebar-layout">
+      <div class="cv-sidebar">
+        <div>
+          <div class="cv-avatar">${initials}</div>
+          <div class="cv-sidebar-name">${nome}</div>
+          <div class="cv-sidebar-role">${cargo}</div>
+        </div>
+        <div class="cv-sidebar-section">
+          <div class="cv-sidebar-section-title">Contato</div>
+          ${contactsHTML}
+        </div>
+        ${skillsHTML}
+      </div>
+      <div class="cv-main">
+        <div class="cv-main-name">${nome}</div>
+        <div class="cv-main-role">${cargo}</div>
+        ${objetivo?`<div class="cv-summary">${objetivo}</div>`:''}
+        ${expHTML}
+        ${eduHTML}
+      </div>
+    </div>
+  `;
+}
+
+/* ── Download PDF ── */
+function downloadCV(){
+  const el=document.getElementById('cv-container');
+  const nome=document.getElementById('nome').value.trim().replace(/\s+/g,'_')||'curriculo';
+  const opt={
+    margin:[10,10,10,10],
+    filename:nome+'_curriculo.pdf',
+    image:{type:'jpeg',quality:0.98},
+    html2canvas:{scale:2,useCORS:true,logging:false},
+    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
+  };
+  html2pdf().set(opt).from(el).save();
+}
+
+/* ── util ── */
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* ── init ── */
+renderSkills();
+</script>
+</body>
+</html>
