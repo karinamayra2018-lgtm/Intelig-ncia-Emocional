@@ -221,7 +221,7 @@
     line-height: 1.55;
   }
 
-  .cv-sidebar-layout { display: flex; gap: 0; min-height: 900px; }
+  .cv-sidebar-layout { display: flex; gap: 0; }
 
   .cv-sidebar {
     width: 26%;
@@ -748,13 +748,15 @@ function buildCV(){
 
 /* ── Download PDF ── */
 function downloadCV(){
-  const el=document.getElementById('cv-container');
+  const el = document.getElementById('cv-container');
   const nome=document.getElementById('nome').value.trim().replace(/\s+/g,'_')||'curriculo';
   const opt={
-    margin:[10,10,10,10],
+    margin: 5,
     filename:nome+'_curriculo.pdf',
-    image:{type:'jpeg',quality:0.98},
-    html2canvas:{scale:2,useCORS:true,logging:false},
+    image:{type:'jpeg',quality: 1},
+    html2canvas:{scale:3,useCORS:true,scrollY: 0
+    },pagebreak: {mode: ['css', 'legacy']
+    },
     jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
   };
   html2pdf().set(opt).from(el).save();
